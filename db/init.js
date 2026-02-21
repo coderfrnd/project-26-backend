@@ -30,9 +30,5 @@ db.run(`
 // For deleteing all null entries (if any)
 // db.run(`
 //   DELETE FROM free_tests
-//   WHERE platform IS NULL
-//     AND exam IS NULL
-//     AND title IS NULL
-//     AND link IS NULL
 // `);
 module.exports = db;

@@ -4,6 +4,8 @@ const db = require("./db/init");
 const app = express();
 app.use(express.json());
 require("./scrapper/testbook");
+require("./scrapper/exambee");
+require("./scrapper/selection-way");
 // base check
 app.get("/", (req, res) => {
   res.send("Backend running");
