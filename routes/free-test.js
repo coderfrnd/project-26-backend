@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db/init");
+const {db} = require("../db/init");
 
 router.post("/free-tests", (req, res) => {
   const tests = req.body;

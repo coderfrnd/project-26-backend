@@ -1,5 +1,5 @@
 import axios from "axios";
-import db from "../db/init.js"; // your SQLite connection
+import {db,classifyExam} from "../db/init.js"; // your SQLite connection
 
 const TR_URL = "https://www.testranking.in/_next/data/JQQe2_huOf7qS2tpstHws/en-US/free-test.json";
 
@@ -23,7 +23,7 @@ async function fetchTestRanking() {
         const exam = (cat.category_label || cat.category_name)
           .toLowerCase()
           .replace(/\s+/g, "-"); // slug for exam
-        const link = `https://www.testranking.in/${catSlug}/${cat.category_name}`;
+        const link = `https://www.testranking.in/free-mock-test/${cat.category_name}`;
 
         tests.push({ platform, exam, title, link });
       });
@@ -41,16 +41,26 @@ async function saveTestsToDB() {
   const tests = await fetchTestRanking();
   if (tests.length === 0) return;
 
+  // 1. Updated SQL to include 'category' and a 5th placeholder '?'
   const stmt = db.prepare(`
-    INSERT OR IGNORE INTO free_tests (platform, exam, title, link)
-    VALUES (?, ?, ?, ?)
+    INSERT OR IGNORE INTO free_tests (platform, exam, category, title, link)
+    VALUES (?, ?, ?, ?, ?)
   `);
 
-  tests.forEach((t) => stmt.run(t.platform, t.exam, t.title, t.link));
+  tests.forEach((t) => {
+    // 2. Pass the exam slug and title into your classifier
+    const category = classifyExam(t.exam, t.title);
+
+    // 3. Add the category to the run parameters
+    stmt.run(t.platform, t.exam, category, t.title, t.link);
+  });
 
   stmt.finalize((err) => {
-    if (err) console.error("Error inserting TestRanking tests:", err.message);
-    else console.log(`Inserted ${tests.length} TestRanking tests ✅`);
+    if (err) {
+      console.error("❌ Error inserting TestRanking tests:", err.message);
+    } else {
+      console.log(`🚀 Successfully processed ${tests.length} tests into the database!`);
+    }
   });
 }
 

@@ -1,8 +1,12 @@
 const express = require("express");
 const db = require("./db/init");
-
+const cors = require("cors");
 const app = express();
 app.use(express.json());
+app.use(cors({
+  // origin: "http://localhost:5173"
+  origin:"https://project-26-frontend.vercel.app/"
+}))
 require("./scrapper/testbook");
 require("./scrapper/exambee");
 require("./scrapper/selection-way");

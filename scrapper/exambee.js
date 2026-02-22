@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import db from "../db/init.js";
+import{ db,classifyExam} from "../db/init.js";
 
 const BASE_URL = "https://www.ixambee.com";
 const LISTING_URL = `${BASE_URL}/free-mock-tests`;
@@ -47,32 +47,38 @@ async function extractFreeTests() {
 }
 
 // Insert scraped tests into SQLite DB
+// Insert scraped tests into SQLite DB
 async function saveTestsToDB() {
   const tests = await extractFreeTests();
   console.log("TOTAL FREE TESTS SCRAPED:", tests.length);
 
   if (tests.length === 0) return;
 
+  // 1. ADD 'category' and the 5th '?' to the SQL query
   const stmt = db.prepare(`
-    INSERT OR IGNORE INTO free_tests (platform, exam, title, link)
-    VALUES (?, ?, ?, ?)
+    INSERT OR IGNORE INTO free_tests (platform, exam, category, title, link)
+    VALUES (?, ?, ?, ?, ?)
   `);
 
   tests.forEach((test) => {
     let examName = test.title.split(" Mock")[0];
 
-    // If title is generic like "View Mock Tests", get exam name from URL
     if (examName.toLowerCase() === "view") {
       const parts = test.url.split("/");
       examName = parts[parts.length - 1].replace(/-/g, " ");
     }
 
-    stmt.run(test.source, examName, test.title, test.url);
+    // 2. RUN THE CLASSIFIER HERE 
+    // We pass both the examName and the full title for better accuracy
+    const category = classifyExam(examName, test.title);
+
+    // 3. ADD 'category' as the third parameter in stmt.run
+    stmt.run(test.source, examName, category, test.title, test.url);
   });
 
   stmt.finalize((err) => {
-    if (err) console.error("Error inserting tests into DB:", err.message);
-    else console.log(`Inserted ${tests.length} ixamBee tests into database ✅`);
+    if (err) console.error("❌ Error inserting tests into DB:", err.message);
+    else console.log(`🚀 Inserted ${tests.length} ixamBee tests into database ✅`);
   });
 }
 
