@@ -18,7 +18,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
  */
 const classifyExam = (exam, title) => {
   const text = `${exam} ${title}`.toLowerCase();
-
+    //  console.log("🔍 Classifying:", text);
   if (text.includes("ssc") || text.includes("cgl") || text.includes("chsl") || text.includes("mts")) return "SSC";
   if (text.includes("rbi") || text.includes("nabard") || text.includes("regulatory") || text.includes("sebi")) return "Regulatory Body";
   if (text.includes("sbi") || text.includes("ibps") || text.includes("clerk") || text.includes("bank")) return "Banking";
@@ -26,6 +26,7 @@ const classifyExam = (exam, title) => {
   if (text.includes("gate") || text.includes("rrb-je") || text.includes("engineering")) return "Engineering";
   if (text.includes("neet") || text.includes("aiims") || text.includes("medical")) return "Medical/NEET";
   if (text.includes("ntpc") || text.includes("alp") || text.includes("rrb")) return "Railways";
+  if (text.includes("iit-jee")|| text.includes("jee") || text.includes("jee-mains")) return "IIT-JEE";
   
   return "Other"; 
 };
