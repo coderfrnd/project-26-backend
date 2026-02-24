@@ -5,7 +5,8 @@ const app = express();
 app.use(express.json());
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://project-26-frontend.vercel.app"
+  "https://project-26-frontend.vercel.app",
+  "https://mockurtest.vercel.app"
 ];
 
 app.use(cors({
